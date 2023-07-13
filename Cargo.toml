@@ -1,0 +1,20 @@
+[package]
+name = "forgetful"
+description = "Track and forget values within a specific scope, enabling detection of repeated values."
+version = "0.1.0"
+authors = ["Casey Waldren"]
+rust-version = "1.56"
+readme = "README.md"
+repository = "https://github.com/cwaldren/forgetful-observer/"
+license = "Apache-2.0"
+keywords = ["raii", "scope", "recursive", "cache", "unique"]
+categories = ["data-structures"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+
+[[example]]
+name = "recursive_search"
