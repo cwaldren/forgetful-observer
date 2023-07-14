@@ -47,7 +47,7 @@ where
 }
 
 /**
-Seen records observations of values of type T. It reports
+Observer records observations of values of type T. It reports
 whether an item was seen before.
 
 This is useful when implementing an algorithm that must
@@ -57,11 +57,14 @@ Observations are scoped; when they fall out of scope,
 Seen forgets about them.
 ```
 use forgetful::Observer;
-let mut observer = Observer::default();
+let observer = Observer::new();
 {
-    let foo = observer.notice("foo").expect("never seen before!");
+    let observation = observer.notice("foo").expect("never seen before");
+    // While 'observation' is in scope, subsequent calls to notice return None.
+    assert!(observer.notice("foo").is_none());
 }
-observer.notice("foo").expect("never seen because it was forgotten when foo went out of scope!");
+// Now that 'observation' is out of scope, this will return Some(Observation).
+assert!(observer.notice("foo").is_some());
 ```
 */
 
@@ -79,9 +82,7 @@ where
     &'a T: Borrow<T>,
 {
     fn default() -> Self {
-        Self {
-            recorder: Default::default(),
-        }
+       Self::new()
     }
 }
 
@@ -101,7 +102,9 @@ where
     &'a T: Borrow<T>,
 {
     pub fn new() -> Self {
-        Default::default()
+        Self {
+            recorder: Default::default(),
+        }
     }
 
     pub fn notice(&self, item: &'a T) -> Option<Observation<'a, T>> {
