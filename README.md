@@ -1,8 +1,8 @@
 ## forgetful observer
 
-This crate allows you to track items seen during execution of an algorithm using the RAII technique. 
+This crate allows you to track items seen during execution of an algorithm using [RAII](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization).
 
-An observation of a particular item is represented by an object called `Observation`. When it falls
+An observation of a particular item is represented by an `Obervation<T>`. When this object falls
 out of scope, the item is forgotten.
 
 This might be useful when implementing a recursive algorithm on a graph that must detect cycles.
@@ -26,4 +26,6 @@ observer.notice(&42);
 ```
 
 Internally, `Observer` stores references to the items
-it notices in a `HashSet`. Upon destruction of an `Observation`, the item reference is removed from the set. 
+it notices in a `HashSet`. 
+
+Upon the `Observation`'s destruction, the item reference is removed from the set. 
