@@ -54,7 +54,7 @@ This is useful when implementing an algorithm that must
 ensure items are encountered only once.
 
 Observations are scoped; when they fall out of scope,
-Seen forgets about them.
+the Observer forgets about them.
 ```
 use forgetful::Observer;
 let observer = Observer::new();
@@ -67,7 +67,6 @@ let observer = Observer::new();
 assert!(observer.notice("foo").is_some());
 ```
 */
-
 pub struct Observer<'a, T>
 where
     T: 'a + Eq + Hash + ?Sized,
@@ -82,7 +81,7 @@ where
     &'a T: Borrow<T>,
 {
     fn default() -> Self {
-       Self::new()
+        Self::new()
     }
 }
 
@@ -119,72 +118,56 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+
     #[test]
-    fn notice_single() {
-        let stack = Observer::default();
-        assert!(stack.notice(&1).is_some());
-        assert!(stack.notice(&1).is_some());
+    fn forgets_immediately_with_no_observer() {
+        let o = Observer::new();
+        assert!(o.notice(&1).is_some());
+        assert!(o.notice(&1).is_some());
     }
 
     #[test]
-    fn notice_twice() {
-        let stack = Observer::default();
-        let _g = stack.notice(&1);
-
-        assert!(stack.notice(&1).is_none());
+    fn does_not_forget_if_observer_in_scope() {
+        let o = Observer::new();
+        let _g = o.notice(&1);
+        assert!(o.notice(&1).is_none());
     }
 
     #[test]
-    fn notice_indep() {
-        let stack = Observer::default();
-        let g = stack.notice(&1);
-        let g2 = stack.notice(&2);
-        assert!(g.is_some());
+    fn unique_items_noticed_independently() {
+        let o = Observer::new();
+        let g1 = o.notice(&1);
+        let g2 = o.notice(&2);
+        assert!(g1.is_some());
         assert!(g2.is_some());
     }
 
     #[test]
-    fn scopes() {
-        let stack = Observer::default();
+    fn nested_scopes() {
+        let o = Observer::new();
         {
-            let foo = stack.notice(&1);
-            assert!(foo.is_some());
-            assert!(stack.notice(&1).is_none());
+            let g1 = o.notice(&1);
+            assert!(g1.is_some());
+            assert!(o.notice(&1).is_none());
             {
-                let bar = stack.notice(&2);
-                assert!(bar.is_some());
-                assert!(stack.notice(&2).is_none());
-                assert!(stack.notice(&1).is_none());
-
+                let g2 = o.notice(&2);
+                assert!(g2.is_some());
+                assert!(o.notice(&1).is_none());
+                assert!(o.notice(&2).is_none());
                 {
-                    let baz = stack.notice(&3);
-                    assert!(baz.is_some());
-                    assert!(stack.notice(&1).is_none());
-                    assert!(stack.notice(&2).is_none());
-                    assert!(stack.notice(&3).is_none());
+                    let g3 = o.notice(&3);
+                    assert!(g3.is_some());
+                    assert!(o.notice(&1).is_none());
+                    assert!(o.notice(&2).is_none());
+                    assert!(o.notice(&3).is_none());
                 }
-                assert!(stack.notice(&3).is_some());
+                assert!(o.notice(&3).is_some());
             }
-            assert!(stack.notice(&2).is_some());
-            assert!(stack.notice(&3).is_some());
+            assert!(o.notice(&2).is_some());
+            assert!(o.notice(&3).is_some());
         }
-        assert!(stack.notice(&1).is_some());
-        assert!(stack.notice(&2).is_some());
-        assert!(stack.notice(&3).is_some());
-    }
-
-    #[test]
-    fn use_strings() {
-        let stack = Observer::default();
-        let g1 = stack.notice("foo");
-        assert!(g1.is_some());
-        assert!(stack.notice("foo").is_none());
-    }
-    #[test]
-    fn debug_thing() {
-        let stack = Observer::default();
-        let _a = stack.notice("foo");
-        let _b = stack.notice("bar");
-        println!("{:?}", stack);
+        assert!(o.notice(&1).is_some());
+        assert!(o.notice(&2).is_some());
+        assert!(o.notice(&3).is_some());
     }
 }
