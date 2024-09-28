@@ -170,4 +170,28 @@ mod tests {
         assert!(o.notice(&2).is_some());
         assert!(o.notice(&3).is_some());
     }
+
+    #[test]
+    fn test_multiple_observers() {
+        let o1 = Observer::new();
+        let o2 = Observer::new();
+
+        assert!(o1.notice(&1).is_some());
+        assert!(o2.notice(&1).is_some());
+
+        let _g1 = o1.notice(&2);
+        assert!(o1.notice(&2).is_none());
+        assert!(o2.notice(&2).is_some());
+    }
+
+    #[test]
+    fn test_observer_debug_output() {
+        let o = Observer::new();
+        let _g1 = o.notice(&1);
+        let _g2 = o.notice(&2);
+
+        let debug_output = format!("{:?}", o);
+        assert!(debug_output.contains("1"));
+        assert!(debug_output.contains("2"));
+    }
 }
